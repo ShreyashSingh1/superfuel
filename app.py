@@ -17,8 +17,26 @@ def example_stream(raw_resume: str) -> Resume:
 
   return final
 
+def process_query_with_tools(query):
+    """Process a user query using the BAML agent with tools"""
+    response = b.AgentWithTools(input={"query": query, "available_tools": ["get_weather", "search", "extract_resume", "duckduckgo_search"]})
+    return response
+
+def process_query(query):
+    """Process a user query using the BAML agent"""
+    response = b.Agent(input={"query": query})
+    return response
+  
+  
 if __name__ == "__main__":
   with open("artifacts/resume.txt", "r") as f:
     raw_resume = f.read()
     print(example(raw_resume))
     print(example_stream(raw_resume))
+    
+    query = "tell new ai inventions"
+    agent_response = process_query(query)
+    print(f"Agent response: {agent_response}")
+    
+    agent_response_with_tools = process_query_with_tools(query)
+    print(f"Agent response with tools: {agent_response_with_tools}")

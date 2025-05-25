@@ -22,11 +22,27 @@ from .globals import DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIM
 class TypeBuilder(_TypeBuilder):
     def __init__(self):
         super().__init__(classes=set(
-          ["Resume",]
+          ["AgentInput","AgentOutput","AgentWithToolsInput","AgentWithToolsOutput","Resume",]
         ), enums=set(
           []
         ), runtime=DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME)
 
+
+    @property
+    def AgentInput(self) -> "AgentInputAst":
+        return AgentInputAst(self)
+
+    @property
+    def AgentOutput(self) -> "AgentOutputAst":
+        return AgentOutputAst(self)
+
+    @property
+    def AgentWithToolsInput(self) -> "AgentWithToolsInputAst":
+        return AgentWithToolsInputAst(self)
+
+    @property
+    def AgentWithToolsOutput(self) -> "AgentWithToolsOutputAst":
+        return AgentWithToolsOutputAst(self)
 
     @property
     def Resume(self) -> "ResumeAst":
@@ -35,6 +51,174 @@ class TypeBuilder(_TypeBuilder):
 
 
 
+
+class AgentInputAst:
+    def __init__(self, tb: _TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("AgentInput")
+        self._properties: typing.Set[str] = set([ "query", ])
+        self._props = AgentInputProperties(self._bldr, self._properties)
+
+    def type(self) -> FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "AgentInputProperties":
+        return self._props
+
+
+class AgentInputViewer(AgentInputAst):
+    def __init__(self, tb: _TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, ClassPropertyViewer]]:
+        return [(name, ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+
+
+
+class AgentInputProperties:
+    def __init__(self, bldr: ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties
+
+    
+
+    @property
+    def query(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("query"))
+
+    
+
+class AgentOutputAst:
+    def __init__(self, tb: _TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("AgentOutput")
+        self._properties: typing.Set[str] = set([ "response",  "action", ])
+        self._props = AgentOutputProperties(self._bldr, self._properties)
+
+    def type(self) -> FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "AgentOutputProperties":
+        return self._props
+
+
+class AgentOutputViewer(AgentOutputAst):
+    def __init__(self, tb: _TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, ClassPropertyViewer]]:
+        return [(name, ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+
+
+
+class AgentOutputProperties:
+    def __init__(self, bldr: ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties
+
+    
+
+    @property
+    def response(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("response"))
+
+    @property
+    def action(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("action"))
+
+    
+
+class AgentWithToolsInputAst:
+    def __init__(self, tb: _TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("AgentWithToolsInput")
+        self._properties: typing.Set[str] = set([ "query",  "available_tools", ])
+        self._props = AgentWithToolsInputProperties(self._bldr, self._properties)
+
+    def type(self) -> FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "AgentWithToolsInputProperties":
+        return self._props
+
+
+class AgentWithToolsInputViewer(AgentWithToolsInputAst):
+    def __init__(self, tb: _TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, ClassPropertyViewer]]:
+        return [(name, ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+
+
+
+class AgentWithToolsInputProperties:
+    def __init__(self, bldr: ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties
+
+    
+
+    @property
+    def query(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("query"))
+
+    @property
+    def available_tools(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("available_tools"))
+
+    
+
+class AgentWithToolsOutputAst:
+    def __init__(self, tb: _TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("AgentWithToolsOutput")
+        self._properties: typing.Set[str] = set([ "response",  "tool_to_use",  "tool_parameters", ])
+        self._props = AgentWithToolsOutputProperties(self._bldr, self._properties)
+
+    def type(self) -> FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "AgentWithToolsOutputProperties":
+        return self._props
+
+
+class AgentWithToolsOutputViewer(AgentWithToolsOutputAst):
+    def __init__(self, tb: _TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, ClassPropertyViewer]]:
+        return [(name, ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+
+
+
+class AgentWithToolsOutputProperties:
+    def __init__(self, bldr: ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties
+
+    
+
+    @property
+    def response(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("response"))
+
+    @property
+    def tool_to_use(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("tool_to_use"))
+
+    @property
+    def tool_parameters(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("tool_parameters"))
+
+    
 
 class ResumeAst:
     def __init__(self, tb: _TypeBuilder):

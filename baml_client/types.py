@@ -41,6 +41,22 @@ def all_succeeded(checks: Dict[CheckName, Check]) -> bool:
 
 
 
+class AgentInput(BaseModel):
+    query: str
+
+class AgentOutput(BaseModel):
+    response: str
+    action: Optional[str] = None
+
+class AgentWithToolsInput(BaseModel):
+    query: str
+    available_tools: List[str]
+
+class AgentWithToolsOutput(BaseModel):
+    response: str
+    tool_to_use: Optional[str] = None
+    tool_parameters: Optional[str] = None
+
 class Resume(BaseModel):
     name: str
     email: str

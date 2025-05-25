@@ -37,6 +37,22 @@ class StreamState(BaseModel, Generic[T]):
     state: Literal["Pending", "Incomplete", "Complete"]
 
 
+class AgentInput(BaseModel):
+    query: Optional[str] = None
+
+class AgentOutput(BaseModel):
+    response: Optional[str] = None
+    action: Optional[str] = None
+
+class AgentWithToolsInput(BaseModel):
+    query: Optional[str] = None
+    available_tools: List[str]
+
+class AgentWithToolsOutput(BaseModel):
+    response: Optional[str] = None
+    tool_to_use: Optional[str] = None
+    tool_parameters: Optional[str] = None
+
 class Resume(BaseModel):
     name: Optional[str] = None
     email: Optional[str] = None
