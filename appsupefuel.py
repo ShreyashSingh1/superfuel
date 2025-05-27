@@ -13,6 +13,34 @@ def generate_plan(paragraph, tools):
         dict: A plan with sequence of tool calls
     """
     response = b.AgentPlanner(input={"paragraph": paragraph, "available_tools": tools})
+    
+    # Post-process the plan to handle incomplete sequential operations
+    if hasattr(response, "plan_description") and hasattr(response, "tool_calls"):
+        # Check if plan description mentions operations not in tool_calls
+        plan_desc = response.plan_description.lower()
+        
+        # Special case for "multiply X by Y, then subtract Z"
+        if ("multiply" in plan_desc and "subtract" in plan_desc and 
+            "from the result" in plan_desc and 
+            len(response.tool_calls) == 1 and
+            response.tool_calls[0].tool_name == "multiply"):
+            
+            # Extract the number to subtract
+            subtract_match = re.search(r"subtract\s+(\d+)", plan_desc)
+            if subtract_match:
+                num_to_subtract = int(subtract_match.group(1))
+                
+                # Create a new tool call for subtraction
+                from types import SimpleNamespace
+                subtract_call = SimpleNamespace(
+                    tool_name="subtract",
+                    parameters=f'{{"a": "result_of_first_sum", "b": {num_to_subtract}}}',
+                    purpose=f"To subtract {num_to_subtract} from the result of multiplication"
+                )
+                
+                # Add the new tool call to the response
+                response.tool_calls = list(response.tool_calls) + [subtract_call]
+    
     return response
 
 def execute_plan(plan):
@@ -56,15 +84,19 @@ def execute_plan(plan):
             # Replace variable references with actual values
             updated_parameters = {}
             for key, value in parameters.items():
-                if isinstance(value, str) and value.startswith("result_of"):
+                if isinstance(value, str) and (value.startswith("result_of") or value == "result_of_sum"):
                     # This is a reference to a previous result
                     if value in intermediate_results:
                         updated_parameters[key] = intermediate_results[value]
                     else:
-                        # If it's the first sum result, use the first result
-                        if value == "result_of_first_sum" and len(results) > 0:
+                        # Handle various reference patterns
+                        if len(results) > 0 and (
+                            value == "result_of_first_sum" or 
+                            value == "result_of_first_operation" or
+                            value == "result_of_sum" or
+                            value == "result"):
                             updated_parameters[key] = results[0]["result"]
-                        # If it's the second sum result, use the second result
+                        # If it's the second result, use the second result
                         elif value == "result_of_second_sum" and len(results) > 1:
                             updated_parameters[key] = results[1]["result"]
                         else:
@@ -77,10 +109,15 @@ def execute_plan(plan):
             
             # Store the result for future reference
             intermediate_results[f"result_{i}"] = result
+            intermediate_results["result_of_sum"] = result  # Generic reference
+            intermediate_results["result"] = result  # Even more generic reference
+            
             if i == 0:
                 intermediate_results["result_of_first_sum"] = result
+                intermediate_results["result_of_first_operation"] = result
             elif i == 1:
                 intermediate_results["result_of_second_sum"] = result
+                intermediate_results["result_of_second_operation"] = result
             
             results.append({
                 "tool": tool_name,
@@ -134,7 +171,7 @@ def execute_tool(tool_name, parameters):
 
 if __name__ == "__main__":
     # Example of using the planner
-    paragraph = "i want to multiply 10 by 20"
+    paragraph = "divide by 10, the sum of 20 and 30"
     tools_list = ["sum", "subtract", "multiply", "divide"]
     
     # Generate the plan
@@ -147,7 +184,7 @@ if __name__ == "__main__":
     
     # Try another example with chained operations
     print("\n\nTrying another example with chained operations:")
-    paragraph2 = "add 20 and 30, then divide it by the sum of 2 and 3"
+    paragraph2 = "add 20 and 30, divide it by the sum of 2 and 3"
     plan2 = generate_plan(paragraph2, tools_list)
     print(f"Generated plan: {plan2}")
     
