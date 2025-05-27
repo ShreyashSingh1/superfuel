@@ -44,6 +44,14 @@ class AgentOutput(BaseModel):
     response: Optional[str] = None
     action: Optional[str] = None
 
+class AgentPlannerInput(BaseModel):
+    paragraph: Optional[str] = None
+    available_tools: List[str]
+
+class AgentPlannerOutput(BaseModel):
+    plan_description: Optional[str] = None
+    tool_calls: List["ToolCall"]
+
 class AgentWithToolsInput(BaseModel):
     query: Optional[str] = None
     available_tools: List[str]
@@ -58,3 +66,8 @@ class Resume(BaseModel):
     email: Optional[str] = None
     experience: List[str]
     skills: List[str]
+
+class ToolCall(BaseModel):
+    tool_name: Optional[str] = None
+    parameters: Optional[str] = None
+    purpose: Optional[str] = None

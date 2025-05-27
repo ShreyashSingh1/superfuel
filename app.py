@@ -26,7 +26,19 @@ def process_query(query):
     """Process a user query using the BAML agent"""
     response = b.Agent(input={"query": query})
     return response
-  
+
+def generate_plan(paragraph, tools):
+    """Generate a plan with tool calls based on a paragraph and list of tools
+    
+    Args:
+        paragraph (str): The input paragraph text to analyze
+        tools (list): List of available tools
+        
+    Returns:
+        dict: A plan with sequence of tool calls
+    """
+    response = b.AgentPlanner(input={"paragraph": paragraph, "available_tools": tools})
+    return response
   
 if __name__ == "__main__":
   with open("artifacts/resume.txt", "r") as f:
@@ -40,3 +52,9 @@ if __name__ == "__main__":
     
     agent_response_with_tools = process_query_with_tools(query)
     print(f"Agent response with tools: {agent_response_with_tools}")
+    
+    # Example of using the planner
+    paragraph = "I need to check the weather in New York and search for information about machine learning"
+    tools_list = ["get_weather", "search", "extract_resume"]
+    plan = generate_plan(paragraph, tools_list)
+    print(f"Generated plan: {plan}")

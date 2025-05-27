@@ -22,7 +22,7 @@ from .globals import DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIM
 class TypeBuilder(_TypeBuilder):
     def __init__(self):
         super().__init__(classes=set(
-          ["AgentInput","AgentOutput","AgentWithToolsInput","AgentWithToolsOutput","Resume",]
+          ["AgentInput","AgentOutput","AgentPlannerInput","AgentPlannerOutput","AgentWithToolsInput","AgentWithToolsOutput","Resume","ToolCall",]
         ), enums=set(
           []
         ), runtime=DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME)
@@ -37,6 +37,14 @@ class TypeBuilder(_TypeBuilder):
         return AgentOutputAst(self)
 
     @property
+    def AgentPlannerInput(self) -> "AgentPlannerInputAst":
+        return AgentPlannerInputAst(self)
+
+    @property
+    def AgentPlannerOutput(self) -> "AgentPlannerOutputAst":
+        return AgentPlannerOutputAst(self)
+
+    @property
     def AgentWithToolsInput(self) -> "AgentWithToolsInputAst":
         return AgentWithToolsInputAst(self)
 
@@ -47,6 +55,10 @@ class TypeBuilder(_TypeBuilder):
     @property
     def Resume(self) -> "ResumeAst":
         return ResumeAst(self)
+
+    @property
+    def ToolCall(self) -> "ToolCallAst":
+        return ToolCallAst(self)
 
 
 
@@ -129,6 +141,90 @@ class AgentOutputProperties:
     @property
     def action(self) -> ClassPropertyViewer:
         return ClassPropertyViewer(self.__bldr.property("action"))
+
+    
+
+class AgentPlannerInputAst:
+    def __init__(self, tb: _TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("AgentPlannerInput")
+        self._properties: typing.Set[str] = set([ "paragraph",  "available_tools", ])
+        self._props = AgentPlannerInputProperties(self._bldr, self._properties)
+
+    def type(self) -> FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "AgentPlannerInputProperties":
+        return self._props
+
+
+class AgentPlannerInputViewer(AgentPlannerInputAst):
+    def __init__(self, tb: _TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, ClassPropertyViewer]]:
+        return [(name, ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+
+
+
+class AgentPlannerInputProperties:
+    def __init__(self, bldr: ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties
+
+    
+
+    @property
+    def paragraph(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("paragraph"))
+
+    @property
+    def available_tools(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("available_tools"))
+
+    
+
+class AgentPlannerOutputAst:
+    def __init__(self, tb: _TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("AgentPlannerOutput")
+        self._properties: typing.Set[str] = set([ "plan_description",  "tool_calls", ])
+        self._props = AgentPlannerOutputProperties(self._bldr, self._properties)
+
+    def type(self) -> FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "AgentPlannerOutputProperties":
+        return self._props
+
+
+class AgentPlannerOutputViewer(AgentPlannerOutputAst):
+    def __init__(self, tb: _TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, ClassPropertyViewer]]:
+        return [(name, ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+
+
+
+class AgentPlannerOutputProperties:
+    def __init__(self, bldr: ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties
+
+    
+
+    @property
+    def plan_description(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("plan_description"))
+
+    @property
+    def tool_calls(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("tool_calls"))
 
     
 
@@ -267,6 +363,52 @@ class ResumeProperties:
     @property
     def skills(self) -> ClassPropertyViewer:
         return ClassPropertyViewer(self.__bldr.property("skills"))
+
+    
+
+class ToolCallAst:
+    def __init__(self, tb: _TypeBuilder):
+        _tb = tb._tb # type: ignore (we know how to use this private attribute)
+        self._bldr = _tb.class_("ToolCall")
+        self._properties: typing.Set[str] = set([ "tool_name",  "parameters",  "purpose", ])
+        self._props = ToolCallProperties(self._bldr, self._properties)
+
+    def type(self) -> FieldType:
+        return self._bldr.field()
+
+    @property
+    def props(self) -> "ToolCallProperties":
+        return self._props
+
+
+class ToolCallViewer(ToolCallAst):
+    def __init__(self, tb: _TypeBuilder):
+        super().__init__(tb)
+
+    
+    def list_properties(self) -> typing.List[typing.Tuple[str, ClassPropertyViewer]]:
+        return [(name, ClassPropertyViewer(self._bldr.property(name))) for name in self._properties]
+
+
+
+class ToolCallProperties:
+    def __init__(self, bldr: ClassBuilder, properties: typing.Set[str]):
+        self.__bldr = bldr
+        self.__properties = properties
+
+    
+
+    @property
+    def tool_name(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("tool_name"))
+
+    @property
+    def parameters(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("parameters"))
+
+    @property
+    def purpose(self) -> ClassPropertyViewer:
+        return ClassPropertyViewer(self.__bldr.property("purpose"))
 
     
 
